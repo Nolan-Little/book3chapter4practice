@@ -4435,14 +4435,81 @@ githubData.forEach((event) => {
 const eventCounts = {};
 
 allEvents.forEach((value)=> {
-    eventCounts[value] = (eventCounts[value] || 0)+1;
+  eventCounts[value] = (eventCounts[value] || 0)+1;
 })
 console.log("event type counter:" , eventCounts);
 
-const pullEvents = [];
+
+// List all Github users who submitted a pull request that was approved by Steve.
+
+let approvedBySteve = [];
+function steveApproves(dataArray) {
+  dataArray.forEach ((event) => {
+    if (event.type === "PullRequestEvent") {
+      if (event.payload.pull_request.user.login != "stevebrownlee")
+      approvedBySteve.push(event.payload.pull_request.user.login)
+    }
+  })
+}
+
+steveApproves(githubData);
+console.log(approvedBySteve);
+
+// List all repositories on which Steve had an event, and show how many events were on each one.
+let repo = [];
+const repoCounts = {};
+
+function listRepo(dataArray) {
+  dataArray.forEach((event)=> {
+    if (repo === undefined) {
+      repo["id"] = event.repo.id
+    } else if (repo["id"] != event.repo.id ){ 
+      repo.push(event.repo.id);
+    }
+  })
+  repo.forEach((value)=> {
+    repoCounts[value] = (repoCounts[value] || 0)+1;
+  })
+}
+
+listRepo(githubData);
+console.log("list of repository ID's and how many times they occur in the event list:", repoCounts);
 
 
-console.log(pullEvents);
+// Which event had the most commits?
+function mostCommits(dataArray) {
+  let commits = 0
+  for (let i = 0; i < dataArray.length; i++) {
+    if (dataArray[i].payload.hasOwnProperty("commits") === true &&
+      dataArray[i].payload.commits.length > commits) {
+      commits = dataArray[i].payload.commits.length
+    } if (dataArray[i].type === ('PullRequestEvent') &&
+      dataArray[i].payload.pull_request.commits > commits) {
+      commits = dataArray[i].payload.pull_request.commits
+    }
+  }
+  return commits
+}
 
+let eventMostCommited = mostCommits(githubData);
+console.log(eventMostCommited);
 
-// Which event had the most commits
+// 2 for 1
+// Which programming langugages were affected by Steve's events?
+// What programming language was the most affected by Steve's events?
+languageArray = [];
+languageList = {}
+function listLanguages(dataArray){
+  dataArray.forEach((event)=> {
+    if (event.type === "PullRequestEvent"){
+      languageArray.push(event.payload.pull_request.base.repo.language);
+      languageArray.push(event.payload.pull_request.head.repo.language);
+      } 
+    })
+    languageArray.forEach((value) => {
+    languageList[value] = (languageList[value] || 0)+1;
+    })
+}
+
+listLanguages(githubData);
+console.log(languageList);
