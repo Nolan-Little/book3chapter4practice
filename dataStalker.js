@@ -4408,16 +4408,20 @@ const githubData = [
 ]
 
 // find out how many commits steve has made
+let pushEventCommits = 0
+let pullEventCommits = 0
+let commitObj = {}
 function commitCounter(dataArray) {
-  let commits = 0
   for (let i = 0; i < dataArray.length; i++) {
-    if (dataArray[i].payload.hasOwnProperty("commits") === true) {
-    commits += dataArray[i].payload.commits.length
+    if (dataArray[i].payload.hasOwnProperty("commits")) {
+    pushEventCommits += dataArray[i].payload.commits.length
     } if (dataArray[i].type === ('PullRequestEvent')) {
-      commits += dataArray[i].payload.pull_request.commits
+      pullEventCommits += dataArray[i].payload.pull_request.commits
     }
   }
-  return commits
+  commitObj.pullEventCommits = pullEventCommits
+  commitObj.pushEventCommits = pushEventCommits
+  return commitObj
 }
 
 let commitedTimes = commitCounter(githubData);
@@ -4425,7 +4429,7 @@ console.log("How many Commits have been made in these events:" ,commitedTimes);
 
 
 
-// Event counter
+// How many of each event type are there? (PullRequestEvent, PushEvent, etc)
 
 const allEvents = [];
 githubData.forEach((event) => {
