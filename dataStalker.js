@@ -4412,13 +4412,13 @@ let pushEventCommits = 0
 let pullEventCommits = 0
 let commitObj = {}
 function commitCounter(dataArray) {
-  for (let i = 0; i < dataArray.length; i++) {
-    if (dataArray[i].payload.hasOwnProperty("commits")) {
-    pushEventCommits += dataArray[i].payload.commits.length
-    } if (dataArray[i].type === ('PullRequestEvent')) {
-      pullEventCommits += dataArray[i].payload.pull_request.commits
+  dataArray.forEach((e) => { 
+    if (e.payload.hasOwnProperty("commits")) {
+    pushEventCommits += e.payload.commits.length
+    } if (e.type === ('PullRequestEvent')) {
+      pullEventCommits += e.payload.pull_request.commits
     }
-  }
+  })
   commitObj.pullEventCommits = pullEventCommits
   commitObj.pushEventCommits = pushEventCommits
   return commitObj
@@ -4483,20 +4483,25 @@ console.log("list of repository ID's and how many times they occur in the event 
 // Which event had the most commits?
 function mostCommits(dataArray) {
   let commits = 0
-  for (let i = 0; i < dataArray.length; i++) {
-    if (dataArray[i].payload.hasOwnProperty("commits") === true &&
-      dataArray[i].payload.commits.length > commits) {
-      commits = dataArray[i].payload.commits.length
-    } if (dataArray[i].type === ('PullRequestEvent') &&
-      dataArray[i].payload.pull_request.commits > commits) {
-      commits = dataArray[i].payload.pull_request.commits
+  let Id = ''
+  let mostCommitedObj = {}
+  dataArray.forEach((e) =>{
+    if (e.payload.hasOwnProperty("commits") === true &&
+      e.payload.commits.length > commits) {
+      commits = e.payload.commits.length
+      id = e.id;
+    } if (e.type === ('PullRequestEvent') &&
+      e.payload.pull_request.commits > commits) {
+      commits = e.payload.pull_request.commits
+      id = e.id
     }
-  }
-  return commits
+  })
+  mostCommitedObj[id] = commits
+  return mostCommitedObj
 }
 
 let eventMostCommited = mostCommits(githubData);
-console.log(eventMostCommited);
+console.log("ID for event with most commits and corresponding number of events", eventMostCommited);
 
 // 2 for 1
 // Which programming langugages were affected by Steve's events?
